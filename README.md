@@ -1,5 +1,7 @@
 # Agentic CLI Workspace
 
+![Terminal Demo](demo.gif)
+
 A lightweight, autonomous Python coding agent that lives entirely in the terminal. I built this to speed up my local development workflows by having an agent that can read my codebase, propose changes, and execute them natively.
 
 ## Tech Stack
@@ -29,6 +31,8 @@ This project is deployed as a serverless backend on Vercel. You can test the API
 
 ```bash
 # Example Request
+
+![Terminal Demo](demo.gif)
 curl -X GET https://agentic-cli-workspace-eb1sw2lhr-dev4aibots.vercel.app/api/health
 ```
 
