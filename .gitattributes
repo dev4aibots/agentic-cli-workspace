@@ -1,5 +1,18 @@
-* text=auto
-*.py linguist-detectable=true
-*.ts linguist-detectable=false
-*.tsx linguist-detectable=false
-*.js linguist-detectable=false
+# GitHub Linguist Overrides to clean up repository language statistics
+# Treat all documentation as docs (removes it from language bar)
+docs/* linguist-documentation
+*.md linguist-documentation
+README.md linguist-documentation
+brag_document.md linguist-documentation
+
+# Treat generated/config files as generated (removes them from language bar)
+*.json linguist-generated
+*.yaml linguist-generated
+*.yml linguist-generated
+package-lock.json linguist-generated
+yarn.lock linguist-generated
+pnpm-lock.yaml linguist-generated
+
+# Ignore testing/mock data
+tests/fixtures/* linguist-vendored
+mocks/* linguist-vendored
