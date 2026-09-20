@@ -1,4 +1,3 @@
 # Architecture
-This document outlines the Architecture for Agentic CLI Workspace.
 
-*(This is a standard technical documentation file for the repository).*
+The agent uses a standard ReAct (Reason-Act) loop, communicating with the LLM via structured JSON to enforce strict typing on filesystem and shell executions.

@@ -1,4 +1,3 @@
 # Evaluation
-This document outlines the Evaluation for Agentic CLI Workspace.
 
-*(This is a standard technical documentation file for the repository).*
+Currently, evaluation relies on a hardcoded set of `EVAL_TASKS` testing basic filesystem interaction and logic termination. Statistical benchmarking against standard coding agent datasets (like SWE-bench) is a future goal.
