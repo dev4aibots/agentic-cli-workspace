@@ -8,12 +8,12 @@
 
 > **A lightweight, autonomous Python coding agent that lives entirely in the terminal. Handles complex multi-step reasoning to debug and write code directly in your local workspace.**
 
-## 🌟 Key Features
-- ✅ **Autonomous file editing and codebase refactoring**
-- ✅ **Terminal-native execution with real-time feedback**
-- ✅ **Local filesystem AST context extraction**
+## Key Features
+- **Autonomous file editing and codebase refactoring**
+- **Terminal-native execution with real-time feedback**
+- **Local filesystem AST context extraction**
 
-## 🏗️ Architecture
+## Architecture
 
 ```mermaid
 flowchart TD
@@ -25,7 +25,7 @@ flowchart TD
     F -->|Write Edits| D
 ```
 
-## 🚀 Live API Endpoint (Vercel)
+## Live API Endpoint (Vercel)
 
 This project is deployed serverless via Vercel Edge Functions. You can test the interaction directly from your terminal.
 
@@ -34,7 +34,7 @@ This project is deployed serverless via Vercel Edge Functions. You can test the 
 curl -X GET https://agentic-cli-workspace-eb1sw2lhr-dev4aibots.vercel.app/api/health
 ```
 
-## 💻 Developer Quickstart
+## Developer Quickstart
 
 ### Prerequisites
 - Python 3.11+
@@ -66,7 +66,7 @@ curl -X GET https://agentic-cli-workspace-eb1sw2lhr-dev4aibots.vercel.app/api/he
    npm run dev
    ```
 
-## 📁 Project Structure
+## Project Structure
 ```
 .
 ├── api/                  # Vercel serverless endpoints
@@ -77,5 +77,5 @@ curl -X GET https://agentic-cli-workspace-eb1sw2lhr-dev4aibots.vercel.app/api/he
 └── vercel.json           # Vercel routing configuration
 ```
 
-## 📄 License
+## License
 This project is licensed under the MIT License.
