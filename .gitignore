@@ -1,1 +1,6 @@
 .vercel
+demo.cast
+demo.tape
+vercel_deploy.log
+vhs_debug.log
+eval_results.json
