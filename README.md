@@ -2,7 +2,9 @@
 
 > Terminal-native coding agent harness (TypeScript) for autonomous implementation and testing.
 
-[Demo](#) | [Architecture](docs/architecture.md) | [API Docs](#) | [Evaluation](#evaluation--performance)
+![Demo](demo.gif)
+
+[Demo](demo.gif) | [Architecture](docs/architecture.md) | [API Docs](#) | [Evaluation](#evaluation--performance)
 
 ## What it does
 A headless, terminal-native AI agent capable of traversing a repository, planning changes, editing files, and running test suites. It focuses on the explicit boundary between the LLM's reasoning loop and the host filesystem's execution context.
