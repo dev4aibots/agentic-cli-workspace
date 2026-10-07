@@ -1,5 +1,9 @@
 # Agentic CLI Workspace
 
+> 🧪 **Learning build** — a course/tutorial project for studying agentic coding-assistant harnesses. Not a production system.
+
+> **Status:** Reference / learning code. The scaffold runs locally for experimentation; it is not deployed, has no production users, and has not been hardened for production use.
+
 > Terminal-native coding agent harness (TypeScript) for autonomous implementation and testing.
 
 ![Demo](demo.gif)
