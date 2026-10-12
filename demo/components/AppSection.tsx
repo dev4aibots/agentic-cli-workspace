@@ -5,7 +5,7 @@ import type { BudgetLimits } from "@/lib/result";
 import { DEFAULT_BUDGET } from "@/lib/result";
 import { Tabs } from "@/components/ui/tabs";
 import { RunView, type RunState } from "@/components/RunView";
-import { BudgetView, EvalView, SafetyView, TraceView, PlanView } from "@/components/views";
+import { BudgetView, EvalView, SafetyView, TraceView, PlanView, INITIAL_EVAL_STATE, type EvalState } from "@/components/views";
 
 const TABS = [
   { id: "run", label: "Task runner", hint: "⌘K" },
@@ -20,6 +20,9 @@ export function AppSection() {
   const [tab, setTab] = React.useState("run");
   const [budget, setBudget] = React.useState<BudgetLimits>({ ...DEFAULT_BUDGET });
   const [run, setRun] = React.useState<RunState | null>(null);
+  // BUG-18: eval state lives here (not in EvalView) so results persist
+  // across tab switches — the tab component unmounts on navigation.
+  const [evalState, setEvalState] = React.useState<EvalState>(INITIAL_EVAL_STATE);
   const inputRef = React.useRef<HTMLInputElement | null>(null);
 
   React.useEffect(() => {
@@ -63,7 +66,7 @@ export function AppSection() {
             <RunView budget={budget} setBudget={setBudget} run={run} setRun={setRun} inputRef={inputRef} />
           )}
           {tab === "budget" && <BudgetView budget={budget} setBudget={setBudget} run={run} />}
-          {tab === "eval" && <EvalView />}
+          {tab === "eval" && <EvalView evalState={evalState} setEvalState={setEvalState} />}
           {tab === "safety" && <SafetyView />}
           {tab === "trace" && <TraceView run={run} />}
           {tab === "plan" && <PlanView run={run} />}

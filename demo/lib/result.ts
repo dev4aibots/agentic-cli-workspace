@@ -33,6 +33,11 @@ export type TurnRecord = {
 export type EngineRunResult = {
   plan: string;
   budget: { turnsUsed: number; tokensUsed: number; dollarsUsed: number };
+  /**
+   * Budget limits frozen at run start. Every gauge limit renders from this
+   * snapshot — never from the live slider state (BUG-17).
+   */
+  budgetSnapshot: BudgetLimits;
   trace: Record<string, unknown>[];
   passed: boolean;
   turns: TurnRecord[];

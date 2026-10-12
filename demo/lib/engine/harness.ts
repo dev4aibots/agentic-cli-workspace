@@ -54,6 +54,12 @@ export type EngineRunResult = RunResult & {
   turns: TurnRecord[];
   planSnapshots: string[];
   stopReason: string;
+  /**
+   * Budget limits frozen at run start (defaults + validated overrides).
+   * The UI must render every gauge limit from this snapshot — never from
+   * live slider state, which the user may move after the run (BUG-17).
+   */
+  budgetSnapshot: { maxTurns: number; maxTokens: number; maxDollars: number };
 };
 
 function applyBudgetOverrides(budget: Budget, overrides: BudgetOverrides): void {
@@ -182,6 +188,11 @@ export async function runAgent(
   return {
     plan: plan.summary(),
     budget: budget.snapshot(),
+    budgetSnapshot: {
+      maxTurns: budget.maxTurns,
+      maxTokens: budget.maxTokens,
+      maxDollars: budget.maxDollars,
+    },
     trace,
     passed,
     turns,

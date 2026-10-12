@@ -112,13 +112,18 @@ export function RunView({
       }
       events.push({
         label: "PostToolUse",
+        // BUG-19: on budget-stopped runs the final turn's tool is never
+        // dispatched, so toolResult is null and `error: ${undefined}` would
+        // leak into the UI. Render the error segment only when defined.
         detail: t.tool
           ? `${t.tool.name} → ${
               t.toolResult?.blocked
                 ? `blocked: ${t.toolResult.reason}`
                 : t.toolResult?.ok
                   ? `ok · ${t.toolResult.bytes?.toLocaleString()} bytes`
-                  : `error: ${t.toolResult?.error}`
+                  : t.toolResult?.error !== undefined
+                    ? `error: ${t.toolResult.error}`
+                    : "not dispatched (run stopped before the tool call)"
             }`
           : "no tool call (model step with tool: null)",
         tone: t.toolResult?.blocked
@@ -179,8 +184,9 @@ export function RunView({
           </Button>
         </div>
         <p className="text-caption mt-3">
-          Deterministic scripted model — no LLM, no network, no API keys. Every
-          number below comes from the real engine payload.
+          Deterministic scripted model — the same canned 3-step plan runs for
+          every task (only the task label changes). No LLM, no network, no API
+          keys. Every number below comes from the real engine payload.
         </p>
       </div>
 
@@ -258,19 +264,19 @@ export function RunView({
               <Gauge
                 label="Turns"
                 used={liveBudget.turnsUsed}
-                limit={budget.maxTurns}
+                limit={result.budgetSnapshot.maxTurns}
                 format={(v) => `${v}`}
               />
               <Gauge
                 label="Tokens"
                 used={liveBudget.tokensUsed}
-                limit={budget.maxTokens}
+                limit={result.budgetSnapshot.maxTokens}
                 format={(v) => v.toLocaleString()}
               />
               <Gauge
                 label="Dollars"
                 used={liveBudget.dollarsUsed}
-                limit={budget.maxDollars}
+                limit={result.budgetSnapshot.maxDollars}
                 format={(v) => `$${v.toFixed(3)}`}
               />
               <p className="text-caption mt-auto">

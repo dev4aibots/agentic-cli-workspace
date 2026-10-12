@@ -73,9 +73,11 @@ export function BudgetView({
           </h3>
           <StopBanner reason={run.result.stopReason} passed={run.result.passed} />
           <div className="mt-5 flex flex-col gap-4">
-            <Gauge label="Turns" used={run.result.budget.turnsUsed} limit={budget.maxTurns} format={(v) => `${v}`} />
-            <Gauge label="Tokens" used={run.result.budget.tokensUsed} limit={budget.maxTokens} format={(v) => v.toLocaleString()} />
-            <Gauge label="Dollars" used={run.result.budget.dollarsUsed} limit={budget.maxDollars} format={(v) => `$${v.toFixed(3)}`} />
+            {/* BUG-17: limits come from the run's frozen budgetSnapshot, not
+                the live sliders — the user may move sliders after the run. */}
+            <Gauge label="Turns" used={run.result.budget.turnsUsed} limit={run.result.budgetSnapshot.maxTurns} format={(v) => `${v}`} />
+            <Gauge label="Tokens" used={run.result.budget.tokensUsed} limit={run.result.budgetSnapshot.maxTokens} format={(v) => v.toLocaleString()} />
+            <Gauge label="Dollars" used={run.result.budget.dollarsUsed} limit={run.result.budgetSnapshot.maxDollars} format={(v) => `$${v.toFixed(3)}`} />
           </div>
         </div>
       )}
@@ -84,25 +86,49 @@ export function BudgetView({
 }
 
 /* ---------------- Eval tab ---------------- */
-export function EvalView() {
-  const [cases, setCases] = React.useState<EvalCaseResult[] | null>(null);
-  const [summary, setSummary] = React.useState<{ passed: number; failed: number } | null>(null);
-  const [running, setRunning] = React.useState(false);
-  const [error, setError] = React.useState<string | null>(null);
+
+/**
+ * Eval state lives in the parent (AppSection), not inside EvalView, so the
+ * last eval result survives tab switches — the tab unmounts on navigation
+ * (BUG-18: results were lost, showing "No eval run yet" again).
+ */
+export type EvalState = {
+  cases: EvalCaseResult[] | null;
+  summary: { passed: number; failed: number } | null;
+  running: boolean;
+  error: string | null;
+};
+
+export const INITIAL_EVAL_STATE: EvalState = {
+  cases: null,
+  summary: null,
+  running: false,
+  error: null,
+};
+
+export function EvalView({
+  evalState,
+  setEvalState,
+}: {
+  evalState: EvalState;
+  setEvalState: React.Dispatch<React.SetStateAction<EvalState>>;
+}) {
+  const { cases, summary, running, error } = evalState;
 
   const runEval = async () => {
-    setRunning(true);
-    setError(null);
+    setEvalState((s) => ({ ...s, running: true, error: null }));
     try {
       const res = await fetch("/api/eval", { method: "POST" });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "eval failed");
-      setCases(data.cases);
-      setSummary({ passed: data.passed, failed: data.failed });
+      setEvalState({
+        cases: data.cases,
+        summary: { passed: data.passed, failed: data.failed },
+        running: false,
+        error: null,
+      });
     } catch (e) {
-      setError((e as Error).message);
-    } finally {
-      setRunning(false);
+      setEvalState((s) => ({ ...s, error: (e as Error).message, running: false }));
     }
   };
 

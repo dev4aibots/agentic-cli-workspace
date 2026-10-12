@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { HookBus, destructiveGuard, toolReadFile } from "@/lib/engine";
-import { sandboxDir } from "@/lib/sandboxPath";
+import { sandboxDir, redactPaths } from "@/lib/sandboxPath";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -60,7 +60,10 @@ export async function POST(req: NextRequest) {
     try {
       output = toolReadFile(dir, args);
     } catch (err) {
-      error = (err as Error).message;
+      // BUG-20: the ENOENT embeds the resolved absolute path
+      // (/var/task/lib/etc/passwd on Vercel) — redact the server prefix.
+      // The containment verdict (error !== null → escaped: false) is unchanged.
+      error = redactPaths((err as Error).message);
     }
     return NextResponse.json({
       probe: "escape",

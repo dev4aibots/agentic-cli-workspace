@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { runAgent } from "@/lib/engine";
-import { sandboxDir } from "@/lib/sandboxPath";
+import { sandboxDir, displayPath, redactPaths } from "@/lib/sandboxPath";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -37,6 +37,19 @@ export async function POST(req: NextRequest) {
       sandboxDir(),
       parsed.data.budget ?? {},
     );
+    // BUG-20: redact engine-internal absolute paths before they reach the
+    // UI — the SessionStart trace event carries the sandbox dir and tool
+    // errors can embed resolved paths (e.g. ENOENT on an escape attempt).
+    // Containment behavior is untouched; this is display-only.
+    for (const p of result.trace as Record<string, unknown>[]) {
+      if (typeof p.sandbox === "string") p.sandbox = displayPath(p.sandbox);
+      if (typeof p.error === "string") p.error = redactPaths(p.error);
+    }
+    for (const t of result.turns) {
+      if (typeof t.toolResult?.error === "string") {
+        t.toolResult.error = redactPaths(t.toolResult.error);
+      }
+    }
     return NextResponse.json(result);
   } catch (err) {
     return NextResponse.json(
