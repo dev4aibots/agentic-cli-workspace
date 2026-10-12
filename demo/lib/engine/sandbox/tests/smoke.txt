@@ -1,0 +1,2 @@
+smoke fixture: the harness runs offline, the model is scripted, the tools are
+deterministic. Expect 3 turns, all-done plan, stopReason=complete.
