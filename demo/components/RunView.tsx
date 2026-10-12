@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { motion } from "motion/react";
 import type {
   BudgetLimits,
   EngineRunResult,
@@ -58,13 +59,17 @@ export function RunView({
       });
     } catch (e) {
       setRun(null);
-      setError(`request failed: ${(e as Error).message}`);
+      setError(
+        `The run could not start: the request failed: ${(e as Error).message}. Check your connection and press “Run the task” again.`,
+      );
       return;
     }
     const data = await res.json();
     if (!res.ok) {
       setRun(null);
-      setError(data.error ?? "run failed");
+      setError(
+        `The run could not start: the server rejected the task: ${data.error ?? "run failed"}. Fix the task text and try again.`,
+      );
       return;
     }
     const result = data as EngineRunResult;
@@ -146,19 +151,16 @@ export function RunView({
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Command bar */}
-      <div
-        className="card card-glass p-4"
-        style={{ borderRadius: "var(--radius-card)" }}
-      >
+      {/* Command bar: the terminal prompt */}
+      <div className="term p-4">
         <label
           htmlFor="task-input"
           className="text-eyebrow mb-3 block"
         >
-          Task
+          Task for the agent
         </label>
         <div className="flex items-center gap-3">
-          <span className="mono text-body" style={{ color: "var(--color-accent)" }}>
+          <span className="mono text-body" style={{ color: "var(--color-accent)" }} aria-hidden="true">
             $
           </span>
           <Input
@@ -180,13 +182,13 @@ export function RunView({
             onClick={startRun}
             disabled={running || task.trim().length === 0}
           >
-            {running ? "Running…" : "Run agent"}
+            {running ? "Running…" : "Run the task"}
           </Button>
         </div>
-        <p className="text-caption mt-3">
-          Deterministic scripted model — the same canned 3-step plan runs for
-          every task (only the task label changes). No LLM, no network, no API
-          keys. Every number below comes from the real engine payload.
+        <p className="text-caption mt-3 max-w-[68ch]">
+          The engine runs the same scripted 3-step plan for any task you type
+          (only the label changes). No LLM, no network, no API keys — every
+          number below comes from the real engine payload.
         </p>
       </div>
 
@@ -249,7 +251,7 @@ export function RunView({
                 <h3 className="text-title" style={{ color: "var(--color-text-primary)" }}>
                   Plan
                 </h3>
-                <Badge tone="accent">whole-plan rewrite · turn {revealed}</Badge>
+                <Badge tone="accent">rewritten every turn · turn {revealed}</Badge>
               </div>
               <Separator className="mb-3" />
               <PlanChecklist items={latestPlan} />
@@ -258,7 +260,7 @@ export function RunView({
             {/* Live gauges */}
             <div className="card flex flex-col gap-5 p-5">
               <h3 className="text-title" style={{ color: "var(--color-text-primary)" }}>
-                Budget
+                Spending so far
               </h3>
               <Separator />
               <Gauge
@@ -280,9 +282,9 @@ export function RunView({
                 format={(v) => `$${v.toFixed(3)}`}
               />
               <p className="text-caption mt-auto">
-                Defaults {DEFAULT_BUDGET.maxTurns} /{" "}
-                {DEFAULT_BUDGET.maxTokens.toLocaleString()} / $
-                {DEFAULT_BUDGET.maxDollars.toFixed(2)} — frozen engine constants.
+                Engine defaults: {DEFAULT_BUDGET.maxTurns} turns /{" "}
+                {DEFAULT_BUDGET.maxTokens.toLocaleString()} tokens / $
+                {DEFAULT_BUDGET.maxDollars.toFixed(2)}, fixed in the engine, not the UI.
               </p>
             </div>
           </div>
@@ -293,10 +295,17 @@ export function RunView({
               Turns <span className="text-caption">({revealed}/{result.turns.length})</span>
             </h3>
             {shownTurns.map((t) => (
-              <TurnCard key={t.turn} turn={t} />
+              <motion.div
+                key={t.turn}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.12, ease: "easeOut" }}
+              >
+                <TurnCard turn={t} />
+              </motion.div>
             ))}
             {running && (
-              <p className="mono text-caption" style={{ color: "var(--color-accent-highlight)" }}>
+              <p className="mono text-caption" style={{ color: "var(--color-accent-highlight)" }} aria-live="polite">
                 ▍ agent thinking…
               </p>
             )}

@@ -5,7 +5,7 @@ import { Separator } from "@/components/ui/scroll-area";
 export default function Page() {
   return (
     <div className="min-h-screen">
-      {/* Top nav */}
+      {/* Top nav — keyboard-first chrome */}
       <header
         className="flex h-12 items-center justify-between border-b px-6"
         style={{ borderColor: "var(--color-border-hairline)", height: "var(--nav-height)" }}
@@ -14,7 +14,7 @@ export default function Page() {
           <span
             className="flex h-6 w-6 items-center justify-center rounded-md text-body font-semibold"
             style={{
-              background: "var(--color-accent-gradient)",
+              background: "var(--color-accent)",
               color: "var(--color-text-on-accent)",
             }}
             aria-hidden="true"
@@ -26,34 +26,40 @@ export default function Page() {
           </span>
           <span className="text-caption hidden sm:inline">live demo</span>
         </div>
-        <span className="mono text-caption">deterministic · offline · zero keys</span>
+        <div className="flex items-center gap-4">
+          <span className="mono text-caption hidden md:inline" style={{ color: "var(--color-text-muted)" }}>
+            no LLM · no network · no keys
+          </span>
+          <span className="kbd">⌘K</span>
+        </div>
       </header>
 
-      {/* Hero — the one react-bits anchor (BlurText, hand reimplemented) */}
+      {/* Hero — the one BlurText anchor */}
       <section
         className="relative overflow-hidden px-6 pb-16 pt-20 text-center lg:pb-20 lg:pt-24"
         style={{ background: "var(--color-bg-accent-glow)" }}
       >
-        <p className="text-eyebrow mb-6">Scripted agent loop · budget gates · safety hooks</p>
+        <p className="text-eyebrow mb-6">Live agent loop · budget caps · safety guards</p>
         <BlurText
-          text="Command your workspace."
+          text="Your terminal, with a team inside it."
           delay={110}
-          className="headline-gradient text-h1 mx-auto max-w-4xl"
+          className="text-h1 mx-auto max-w-3xl"
         />
         <p
-          className="text-body-lg mx-auto mt-6 max-w-2xl"
+          className="text-body-lg mx-auto mt-6 max-w-[62ch]"
           style={{ color: "var(--color-text-secondary)" }}
         >
-          Watch a plan → act → observe loop run for real: whole-plan rewrites,
-          PreToolUse guard rails, a sandbox the file tool cannot escape, and a
-          budget that actually stops the run.
+          This is a working demo of an agent that plans, acts, and checks its
+          own work. Type a task below and press run: the engine rewrites its
+          whole plan every turn while budget caps and safety hooks keep it
+          honest. Every number is real, from the engine payload.
         </p>
         <div className="mt-8 flex items-center justify-center gap-4">
           <a href="#app" className="btn-primary no-underline">
-            Run the agent
+            Run your first task
           </a>
           <span className="mono text-caption" style={{ color: "var(--color-text-muted)" }}>
-            press <span className="kbd">⌘K</span> to focus the command bar
+            press <span className="kbd">⌘K</span> for the command palette
           </span>
         </div>
       </section>
@@ -69,11 +75,10 @@ export default function Page() {
 
       {/* Footer */}
       <footer className="px-6 py-8">
-        <p className="mono text-caption mx-auto max-w-4xl text-center">
-          Engine: port of dev4aibots/agentic-cli-workspace, vendored verbatim in
-          web/lib/engine · Design tokens: DESIGN.md (Linear) · Built with
-          Next.js 14 + shadcn-style components · No login, no credentials, no
-          external calls
+        <p className="mono text-caption mx-auto max-w-3xl text-center">
+          Engine ported from dev4aibots/agentic-cli-workspace and vendored in
+          web/lib/engine · Tokens in DESIGN.md (Linear) · Next.js 14 · No login,
+          no keys, no external calls
         </p>
       </footer>
     </div>

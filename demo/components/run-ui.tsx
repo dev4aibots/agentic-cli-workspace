@@ -1,7 +1,8 @@
 "use client";
 
 import * as React from "react";
-import type { EngineRunResult, Status, TodoItem } from "@/lib/result";
+import { motion } from "motion/react";
+import type { EngineRunResult, TodoItem } from "@/lib/result";
 import { STATUS_MARK, STATUS_TONE } from "@/lib/result";
 import { Badge } from "@/components/ui/badge";
 
@@ -9,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 export function PlanChecklist({ items }: { items: TodoItem[] }) {
   if (items.length === 0)
     return (
-      <p className="text-caption">No plan items yet — the agent has not started.</p>
+      <p className="text-caption">No plan items yet. The agent has not started.</p>
     );
   return (
     <ul className="flex flex-col gap-1">
@@ -32,6 +33,7 @@ export function PlanChecklist({ items }: { items: TodoItem[] }) {
               background:
                 it.status === "in_progress" ? "var(--color-bg-active)" : "transparent",
             }}
+            aria-label={it.status.replace("_", " ")}
           >
             {STATUS_MARK[it.status]}
           </span>
@@ -88,7 +90,7 @@ export function TurnCard({ turn }: { turn: EngineRunResult["turns"][number] }) {
           </code>
         ) : (
           <span className="text-body" style={{ color: "var(--color-text-muted)" }}>
-            no tool call — script complete
+            no tool call: the script finished here
           </span>
         )}
         <span className="ml-auto flex items-center gap-2">
@@ -190,14 +192,17 @@ export function StopBanner({ reason, passed }: { reason: string; passed: boolean
     budget: "warning",
   };
   const copy: Record<string, string> = {
-    complete: "Run completed — the scripted model finished its plan.",
-    turn_limit: "Stopped: turn limit reached before the plan finished.",
-    token_limit: "Stopped: token budget exhausted.",
-    dollar_limit: "Stopped: dollar budget exhausted.",
-    budget: "Stopped: budget tripped right after a turn (engine semantics).",
+    complete: "Done. The scripted model finished its plan.",
+    turn_limit: "Stopped: the turn limit hit before the plan finished.",
+    token_limit: "Stopped: the token budget ran out.",
+    dollar_limit: "Stopped: the dollar budget ran out.",
+    budget: "Stopped: a turn spent past a budget cap (engine semantics).",
   };
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.12, ease: "easeOut" }}
       className="flex items-center gap-3 rounded-lg border px-4 py-3"
       style={{
         borderColor: "var(--color-border-hairline)",
@@ -214,7 +219,7 @@ export function StopBanner({ reason, passed }: { reason: string; passed: boolean
           {passed ? "passed" : "not passed"}
         </Badge>
       </span>
-    </div>
+    </motion.div>
   );
 }
 

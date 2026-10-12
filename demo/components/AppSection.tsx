@@ -1,77 +1,160 @@
 "use client";
 
 import * as React from "react";
+import { AnimatePresence, motion } from "motion/react";
 import type { BudgetLimits } from "@/lib/result";
 import { DEFAULT_BUDGET } from "@/lib/result";
 import { Tabs } from "@/components/ui/tabs";
 import { RunView, type RunState } from "@/components/RunView";
+import { CommandPalette, type PaletteCommand } from "@/components/CommandPalette";
 import { BudgetView, EvalView, SafetyView, TraceView, PlanView, INITIAL_EVAL_STATE, type EvalState } from "@/components/views";
 
 const TABS = [
-  { id: "run", label: "Task runner", hint: "⌘K" },
-  { id: "budget", label: "Budget" },
-  { id: "eval", label: "Eval suite" },
-  { id: "safety", label: "Safety playground" },
-  { id: "trace", label: "Trace timeline" },
-  { id: "plan", label: "Plan inspector" },
+  { id: "run", label: "Run a task", hint: "⌘K" },
+  { id: "budget", label: "Set limits" },
+  { id: "eval", label: "Run the checks" },
+  { id: "safety", label: "Test safety" },
+  { id: "trace", label: "Read the trace" },
+  { id: "plan", label: "Read the plan" },
 ];
+
+const TAB_LABEL: Record<string, string> = Object.fromEntries(
+  TABS.map((t) => [t.id, t.label]),
+);
 
 export function AppSection() {
   const [tab, setTab] = React.useState("run");
   const [budget, setBudget] = React.useState<BudgetLimits>({ ...DEFAULT_BUDGET });
   const [run, setRun] = React.useState<RunState | null>(null);
+  const [paletteOpen, setPaletteOpen] = React.useState(false);
   // BUG-18: eval state lives here (not in EvalView) so results persist
   // across tab switches — the tab component unmounts on navigation.
   const [evalState, setEvalState] = React.useState<EvalState>(INITIAL_EVAL_STATE);
   const inputRef = React.useRef<HTMLInputElement | null>(null);
 
+  const goTo = React.useCallback((id: string) => {
+    setTab(id);
+    document.getElementById("app")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, []);
+
+  const focusTaskBox = React.useCallback(() => {
+    setTab("run");
+    requestAnimationFrame(() => {
+      document.getElementById("app")?.scrollIntoView({ block: "start" });
+      inputRef.current?.focus();
+      inputRef.current?.select();
+    });
+  }, []);
+
+  // ⌘K / Ctrl+K opens the command palette from anywhere.
   React.useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
-        setTab("run");
-        requestAnimationFrame(() => inputRef.current?.focus());
+        setPaletteOpen((o) => !o);
       }
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, []);
 
+  const commands: PaletteCommand[] = React.useMemo(
+    () => [
+      ...TABS.map((t) => ({
+        id: `go-${t.id}`,
+        group: "Go to" as const,
+        label: t.label,
+        hint: t.hint,
+        run: () => goTo(t.id),
+      })),
+      {
+        id: "focus-task",
+        group: "Actions" as const,
+        label: "Focus the task box",
+        hint: "↵",
+        run: focusTaskBox,
+      },
+      {
+        id: "reset-budget",
+        group: "Actions" as const,
+        label: "Reset limits to defaults",
+        run: () => {
+          setBudget({ ...DEFAULT_BUDGET });
+          goTo("budget");
+        },
+      },
+    ],
+    [goTo, focusTaskBox],
+  );
+
   return (
     <div className="flex flex-col gap-0 lg:flex-row">
       <aside
         className="shrink-0 border-b lg:w-60 lg:border-b-0 lg:border-r"
         style={{ borderColor: "var(--color-border-hairline)" }}
-        aria-label="Demo navigation"
+        aria-label="Demo sections"
       >
         <div className="p-4 lg:sticky lg:top-0">
           <p className="text-eyebrow mb-3 px-3">Demo</p>
           <Tabs tabs={TABS} active={tab} onChange={setTab} />
+          <button
+            onClick={() => setPaletteOpen(true)}
+            className="mt-3 flex w-full items-center justify-between rounded-md border px-3 py-2 text-left outline-none"
+            style={{
+              borderColor: "var(--color-border-hairline)",
+              color: "var(--color-text-muted)",
+              transition: "var(--motion-transition-state)",
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.background = "var(--color-bg-hover)")}
+            onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+            aria-label="Open command palette"
+          >
+            <span className="text-body">Search commands…</span>
+            <span className="kbd">⌘K</span>
+          </button>
           <div
             className="mt-6 rounded-lg border p-3"
             style={{ borderColor: "var(--color-border-hairline)" }}
           >
-            <p className="text-caption">Engine status</p>
+            <p className="text-caption">Engine</p>
             <p className="mono mt-1 text-body" style={{ color: "var(--color-status-success)" }}>
               ● live · deterministic
             </p>
-            <p className="text-caption mt-1">No LLM · no network · no keys</p>
+            <p className="text-caption mt-1">
+              Scripted model — no keys, no network calls.
+            </p>
           </div>
         </div>
       </aside>
 
-      <main className="min-w-0 flex-1 p-6 lg:p-10" role="tabpanel">
+      <main className="min-w-0 flex-1 p-6 lg:p-10" role="tabpanel" aria-label={TAB_LABEL[tab]}>
         <div className="mx-auto max-w-4xl">
-          {tab === "run" && (
-            <RunView budget={budget} setBudget={setBudget} run={run} setRun={setRun} inputRef={inputRef} />
-          )}
-          {tab === "budget" && <BudgetView budget={budget} setBudget={setBudget} run={run} />}
-          {tab === "eval" && <EvalView evalState={evalState} setEvalState={setEvalState} />}
-          {tab === "safety" && <SafetyView />}
-          {tab === "trace" && <TraceView run={run} />}
-          {tab === "plan" && <PlanView run={run} />}
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={tab}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.12, ease: "easeOut" }}
+            >
+              {tab === "run" && (
+                <RunView budget={budget} setBudget={setBudget} run={run} setRun={setRun} inputRef={inputRef} />
+              )}
+              {tab === "budget" && <BudgetView budget={budget} setBudget={setBudget} run={run} />}
+              {tab === "eval" && <EvalView evalState={evalState} setEvalState={setEvalState} />}
+              {tab === "safety" && <SafetyView />}
+              {tab === "trace" && <TraceView run={run} />}
+              {tab === "plan" && <PlanView run={run} />}
+            </motion.div>
+          </AnimatePresence>
         </div>
       </main>
+
+      <CommandPalette
+        open={paletteOpen}
+        onOpenChange={setPaletteOpen}
+        commands={commands}
+      />
     </div>
   );
 }

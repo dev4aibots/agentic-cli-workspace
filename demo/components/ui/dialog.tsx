@@ -35,7 +35,6 @@ export function Dialog({
         className="absolute inset-0"
         style={{
           background: "var(--color-bg-overlay)",
-          backdropFilter: "blur(8px)",
         }}
         onClick={() => onOpenChange(false)}
       />

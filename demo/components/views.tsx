@@ -27,15 +27,15 @@ export function BudgetView({
         <div className="mb-5 flex items-center justify-between">
           <div>
             <h2 className="text-h3" style={{ color: "var(--color-text-primary)" }}>
-              Budget controls
+              Spending limits
             </h2>
-            <p className="text-caption mt-1">
-              Overrides are per-call; the engine defaults (50 / 200,000 / $5.00) are
-              frozen constants.
+            <p className="text-caption mt-1 max-w-[68ch]">
+              Caps apply per run. The engine's own defaults (50 turns, 200,000
+              tokens, $5.00) are fixed constants the UI cannot change.
             </p>
           </div>
           <Button variant="secondary" onClick={reset}>
-            Reset to defaults
+            Reset to engine defaults
           </Button>
         </div>
         <div className="flex flex-col gap-6">
@@ -50,19 +50,19 @@ export function BudgetView({
 
       <div className="card p-6">
         <h3 className="text-title mb-3" style={{ color: "var(--color-text-primary)" }}>
-          Stop semantics (engine-verbatim)
+          Why a run stops
         </h3>
         <Separator className="mb-4" />
         <ul className="mono flex flex-col gap-2 text-body" style={{ color: "var(--color-text-secondary)" }}>
-          <li><Badge tone="warning">turn_limit</Badge> top-of-loop pre-check · completed=false</li>
-          <li><Badge tone="warning">token_limit</Badge> top-of-loop pre-check · completed=false</li>
-          <li><Badge tone="warning">dollar_limit</Badge> top-of-loop pre-check · completed=false</li>
-          <li><Badge tone="warning">budget</Badge> tripped right after a turn&apos;s budget.step · completed=true</li>
-          <li><Badge tone="success">complete</Badge> scripted step with tool: null · completed=true</li>
+          <li><Badge tone="warning">turn_limit</Badge> checked before each turn · run marked incomplete</li>
+          <li><Badge tone="warning">token_limit</Badge> checked before each turn · run marked incomplete</li>
+          <li><Badge tone="warning">dollar_limit</Badge> checked before each turn · run marked incomplete</li>
+          <li><Badge tone="warning">budget</Badge> tripped right after a turn spent past a cap · run marked complete</li>
+          <li><Badge tone="success">complete</Badge> the scripted step ran with no tool call · run marked complete</li>
         </ul>
-        <p className="text-caption mt-4">
-          Try it: set Max turns to 1 and run — the agent stops after one turn with
-          stopReason &quot;budget&quot; (the upstream behavior, asserted by the engine tests).
+        <p className="text-caption mt-4 max-w-[68ch]">
+          Try it: set Max turns to 1, run the task, and watch the agent stop
+          after one turn with reason &quot;budget&quot;.
         </p>
       </div>
 
@@ -74,7 +74,7 @@ export function BudgetView({
           <StopBanner reason={run.result.stopReason} passed={run.result.passed} />
           <div className="mt-5 flex flex-col gap-4">
             {/* BUG-17: limits come from the run's frozen budgetSnapshot, not
-                the live sliders — the user may move sliders after the run. */}
+                the live sliders; the user may move sliders after the run. */}
             <Gauge label="Turns" used={run.result.budget.turnsUsed} limit={run.result.budgetSnapshot.maxTurns} format={(v) => `${v}`} />
             <Gauge label="Tokens" used={run.result.budget.tokensUsed} limit={run.result.budgetSnapshot.maxTokens} format={(v) => v.toLocaleString()} />
             <Gauge label="Dollars" used={run.result.budget.dollarsUsed} limit={run.result.budgetSnapshot.maxDollars} format={(v) => `$${v.toFixed(3)}`} />
@@ -89,7 +89,7 @@ export function BudgetView({
 
 /**
  * Eval state lives in the parent (AppSection), not inside EvalView, so the
- * last eval result survives tab switches — the tab unmounts on navigation
+ * last eval result survives tab switches: the tab unmounts on navigation
  * (BUG-18: results were lost, showing "No eval run yet" again).
  */
 export type EvalState = {
@@ -128,7 +128,11 @@ export function EvalView({
         error: null,
       });
     } catch (e) {
-      setEvalState((s) => ({ ...s, error: (e as Error).message, running: false }));
+      setEvalState((s) => ({
+        ...s,
+        error: `The checks could not run (${(e as Error).message}). The API route may be down. Wait a moment and press “Run the checks” again.`,
+        running: false,
+      }));
     }
   };
 
@@ -138,15 +142,15 @@ export function EvalView({
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-h3" style={{ color: "var(--color-text-primary)" }}>
-              Eval suite
+              Fixed checks
             </h2>
-            <p className="text-caption mt-1">
-              The engine&apos;s verbatim EVAL_TASKS. Pass rule: passed &amp;&amp;
-              doneCount ≥ expectedDone.
+            <p className="text-caption mt-1 max-w-[68ch]">
+              The engine's own EVAL_TASKS, run for real. A case passes only when
+              it finished <em>and</em> completed enough steps.
             </p>
           </div>
           <Button variant="primary" onClick={runEval} disabled={running}>
-            {running ? "Evaluating…" : "Run eval"}
+            {running ? "Checking…" : "Run the checks"}
           </Button>
         </div>
       </div>
@@ -164,7 +168,7 @@ export function EvalView({
             {summary.passed} passed
           </Badge>
           {summary.failed > 0 && <Badge tone="danger">{summary.failed} failed</Badge>}
-          <span className="text-caption">{cases?.length ?? 0} cases · engine-verbatim pass rule</span>
+          <span className="text-caption">{cases?.length ?? 0} cases · pass rule from the engine</span>
         </div>
       )}
 
@@ -173,15 +177,6 @@ export function EvalView({
           {cases.map((c) => (
             <div key={c.task} className="card p-5">
               <div className="flex items-center gap-3">
-                <span
-                  className="mono flex h-7 w-7 items-center justify-center rounded-md text-body"
-                  style={{
-                    border: "1px solid var(--color-border-hairline)",
-                    color: c.passed ? "var(--color-status-success)" : "var(--color-status-danger)",
-                  }}
-                >
-                  {c.passed ? "✓" : "✗"}
-                </span>
                 <code className="mono text-body" style={{ color: "var(--color-text-primary)" }}>
                   {c.task}
                 </code>
@@ -206,7 +201,7 @@ export function EvalView({
       )}
 
       {!cases && !running && (
-        <StatusLine text="No eval run yet — press “Run eval”." />
+        <StatusLine text="No checks run yet. Press “Run the checks” to run all three." />
       )}
     </div>
   );
@@ -241,22 +236,22 @@ export function SafetyView() {
     <div className="flex flex-col gap-6">
       <div className="card card-glass p-6">
         <h2 className="text-h3" style={{ color: "var(--color-text-primary)" }}>
-          Safety playground
+          Safety drills
         </h2>
-        <p className="text-caption mt-1 max-w-2xl">
-          These probes call the <em>real</em> engine guard and the{" "}
-          <em>real</em> sandboxed file tool — not simulations. No shell is ever
-          spawned; the destructive guard fires inside the PreToolUse hook.
+        <p className="text-caption mt-1 max-w-[68ch]">
+          These fire the <em>real</em> guard and the <em>real</em> sandboxed file
+          tool, not simulations. No shell is ever started; the destructive guard
+          fires inside the PreToolUse hook.
         </p>
         <div className="mt-5 flex flex-wrap gap-3">
           <Button variant="secondary" onClick={() => probe("destructive")} disabled={busy !== null}>
-            {busy === "destructive" ? "Probing…" : 'Attempt rm -rf /tmp/test'}
+            {busy === "destructive" ? "Probing…" : "Try to delete /tmp/test"}
           </Button>
           <Button variant="secondary" onClick={() => probe("escape")} disabled={busy !== null}>
-            {busy === "escape" ? "Probing…" : "Attempt ../escape read"}
+            {busy === "escape" ? "Probing…" : "Try to read outside the sandbox"}
           </Button>
           <Button variant="ghost" onClick={() => probe("safe")} disabled={busy !== null}>
-            {busy === "safe" ? "Probing…" : "Benign ls (control)"}
+            {busy === "safe" ? "Probing…" : "List a file (control)"}
           </Button>
         </div>
       </div>
@@ -272,12 +267,12 @@ export function SafetyView() {
               <span className="ml-auto">
                 {r.probe === "destructive" && (
                   <Badge tone={r.blocked ? "success" : "danger"}>
-                    {r.blocked ? "blocked by PreToolUse guard" : "NOT BLOCKED"}
+                    {r.blocked ? "blocked by the PreToolUse guard" : "NOT BLOCKED"}
                   </Badge>
                 )}
                 {r.probe === "escape" && (
                   <Badge tone={r.escaped ? "danger" : "success"}>
-                    {r.escaped ? "escaped sandbox" : "containment held"}
+                    {r.escaped ? "escaped the sandbox" : "containment held"}
                   </Badge>
                 )}
                 {r.probe === "safe" && (
@@ -291,7 +286,7 @@ export function SafetyView() {
             <div className="mono flex flex-col gap-1 text-body" style={{ color: "var(--color-text-secondary)" }}>
               {r.probe === "destructive" && (
                 <>
-                  <span>blockReason: <b style={{ color: "var(--color-status-warning)" }}>{r.blockReason ?? "—"}</b></span>
+                  <span>blockReason: <b style={{ color: "var(--color-status-warning)" }}>{r.blockReason ?? "none"}</b></span>
                   <span>shellSpawned: <b style={{ color: "var(--color-status-success)" }}>{String(r.shellSpawned)}</b></span>
                 </>
               )}
@@ -300,12 +295,12 @@ export function SafetyView() {
                   ? <span>thrown: <b style={{ color: "var(--color-status-danger)" }}>{r.error}</b></span>
                   : <span>output preview: <b>{r.output?.slice(0, 120)}</b></span>
               )}
-              {r.probe === "safe" && <span>destructiveGuard returned the payload unblocked.</span>}
+              {r.probe === "safe" && <span>The destructive guard returned the payload unblocked.</span>}
             </div>
           </div>
         ))}
         {results.length === 0 && (
-          <StatusLine text="No probes yet — fire one above. The guard patterns are the engine's frozen blocklist: /\brm\s+-rf\b/ and /\bshutdown\b/." />
+          <StatusLine text="No drills fired yet. Fire one above; the guard blocks two frozen patterns: /\brm\s+-rf\b/ and /\bshutdown\b/." />
         )}
       </div>
     </div>
@@ -319,9 +314,9 @@ export function TraceView({ run }: { run: { result: EngineRunResult } | null }) 
     return (
       <div className="card p-6">
         <h2 className="text-h3 mb-2" style={{ color: "var(--color-text-primary)" }}>
-          Trace timeline
+          Trace
         </h2>
-        <StatusLine text="Run the agent first — the full hook-event log will appear here." />
+        <StatusLine text="Run the task first. The full hook log will appear here." />
       </div>
     );
   return (
@@ -329,13 +324,13 @@ export function TraceView({ run }: { run: { result: EngineRunResult } | null }) 
       <div className="card card-glass p-6">
         <div className="flex items-center justify-between">
           <h2 className="text-h3" style={{ color: "var(--color-text-primary)" }}>
-            Trace timeline
+            Trace
           </h2>
           <Badge tone="accent">{result.trace.length} events</Badge>
         </div>
-        <p className="text-caption mt-1">
-          Raw HookPayload log from the engine, verbatim. Budget snapshot at
-          SessionEnd included.
+        <p className="text-caption mt-1 max-w-[68ch]">
+          Every hook event the engine emitted, in order. Raw log, nothing
+          trimmed. Budget snapshot at SessionEnd included.
         </p>
       </div>
       <ScrollArea className="card max-h-[560px] p-5">
@@ -373,21 +368,20 @@ export function PlanView({ run }: { run: { result: EngineRunResult } | null }) {
     return (
       <div className="card p-6">
         <h2 className="text-h3 mb-2" style={{ color: "var(--color-text-primary)" }}>
-          Plan inspector
+          Plan
         </h2>
-        <StatusLine text="Run the agent first — per-turn plan snapshots will appear here." />
+        <StatusLine text="Run the task first. Per-turn plan snapshots will appear here." />
       </div>
     );
   return (
     <div className="flex flex-col gap-6">
       <div className="card card-glass p-6">
         <h2 className="text-h3" style={{ color: "var(--color-text-primary)" }}>
-          Plan inspector
+          Plan
         </h2>
-        <p className="text-caption mt-1 max-w-2xl">
-          The engine rewrites the <em>whole plan</em> every turn (PlanState.rewrite)
-          — no partial updates. Each snapshot below is plan.summary() after that
-          turn&apos;s rewrite.
+        <p className="text-caption mt-1 max-w-[68ch]">
+          The engine rewrites the <em>whole plan</em> after every turn. It never
+          patches it. Each card is the plan right after that turn.
         </p>
       </div>
       <div className="flex flex-col gap-3">
