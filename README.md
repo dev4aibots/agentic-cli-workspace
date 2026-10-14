@@ -1,6 +1,6 @@
 # Agentic CLI Workspace
 
-🚀 **Live demo:** https://agentic-cli-workspace-demo-8yv8e6nsu-dev4aibots.vercel.app
+🚀 **Live demo:** https://agentic-cli-workspace-demo.vercel.app
 
 
 > 🧪 **Learning build** — a course/tutorial project for studying agentic coding-assistant harnesses. Not a production system.
