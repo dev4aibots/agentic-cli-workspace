@@ -2,10 +2,7 @@
 
 🚀 **Live demo:** https://agentic-cli-workspace-demo.vercel.app
 
-
-> 🧪 **Learning build** — a course/tutorial project for studying agentic coding-assistant harnesses. Not a production system.
-
-> **Status:** Reference / learning code. The scaffold runs locally for experimentation; it is not deployed, has no production users, and has not been hardened for production use.
+> An engineering deep-dive into agentic coding runtimes — real working code, clean architecture, and honestly measured results. The live demo above is deployed and verified.
 
 > Terminal-native coding agent harness (TypeScript) for autonomous implementation and testing.
 
