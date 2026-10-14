@@ -146,7 +146,7 @@ export function EvalView({
             </h2>
             <p className="text-caption mt-1 max-w-[68ch]">
               The engine's own EVAL_TASKS, run for real. A case passes only when
-              it finished <em>and</em> completed enough steps.
+              the run passed and enough plan steps were marked done.
             </p>
           </div>
           <Button variant="primary" onClick={runEval} disabled={running}>
@@ -213,8 +213,28 @@ type SafetyResult =
   | { probe: "escape"; tool: string; args: Record<string, string>; output: string | null; error: string | null; escaped: boolean }
   | { probe: "safe"; tool: string; args: Record<string, string>; blocked: boolean };
 
-export function SafetyView() {
-  const [results, setResults] = React.useState<SafetyResult[]>([]);
+/**
+ * Safety-drill state lives in the parent (AppSection), not inside
+ * SafetyView — same pattern as EvalView (BUG-18). Drill results used to
+ * reset to "No drills fired yet" on every tab switch while check results
+ * persisted (QA-2).
+ */
+export type SafetyState = {
+  results: SafetyResult[];
+};
+
+export const INITIAL_SAFETY_STATE: SafetyState = {
+  results: [],
+};
+
+export function SafetyView({
+  safetyState,
+  setSafetyState,
+}: {
+  safetyState: SafetyState;
+  setSafetyState: React.Dispatch<React.SetStateAction<SafetyState>>;
+}) {
+  const { results } = safetyState;
   const [busy, setBusy] = React.useState<string | null>(null);
 
   const probe = async (name: "destructive" | "escape" | "safe") => {
@@ -226,7 +246,7 @@ export function SafetyView() {
         body: JSON.stringify({ probe: name }),
       });
       const data = (await res.json()) as SafetyResult;
-      setResults((r) => [data, ...r].slice(0, 6));
+      setSafetyState((s) => ({ results: [data, ...s.results].slice(0, 6) }));
     } finally {
       setBusy(null);
     }

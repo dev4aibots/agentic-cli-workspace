@@ -1,5 +1,6 @@
 import { BlurText } from "@/components/BlurText";
 import { AppSection } from "@/components/AppSection";
+import { HeroCta } from "@/components/HeroCta";
 import { Separator } from "@/components/ui/scroll-area";
 
 export default function Page() {
@@ -55,9 +56,7 @@ export default function Page() {
           honest. Every number is real, from the engine payload.
         </p>
         <div className="mt-8 flex items-center justify-center gap-4">
-          <a href="#app" className="btn-primary no-underline">
-            Run your first task
-          </a>
+          <HeroCta />
           <span className="mono text-caption" style={{ color: "var(--color-text-muted)" }}>
             press <span className="kbd">⌘K</span> for the command palette
           </span>

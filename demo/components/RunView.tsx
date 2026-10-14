@@ -20,6 +20,10 @@ export type RunState = {
   result: EngineRunResult;
   revealed: number; // turns revealed so far
   running: boolean;
+  // QA-1: the task label frozen at run start. The run summary must read the
+  // label from the run record — never from the (remountable) input state —
+  // or a completed run gets mislabeled after a tab switch.
+  task: string;
 };
 
 export function RunView({
@@ -27,15 +31,18 @@ export function RunView({
   setBudget,
   run,
   setRun,
+  task,
+  setTask,
   inputRef,
 }: {
   budget: BudgetLimits;
   setBudget: (b: BudgetLimits) => void;
   run: RunState | null;
   setRun: React.Dispatch<React.SetStateAction<RunState | null>>;
+  task: string;
+  setTask: (t: string) => void;
   inputRef: React.Ref<HTMLInputElement>;
 }) {
-  const [task, setTask] = React.useState("summarize README");
   const [error, setError] = React.useState<string | null>(null);
   const timer = React.useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -49,7 +56,7 @@ export function RunView({
   const startRun = async () => {
     if (timer.current) clearInterval(timer.current);
     setError(null);
-    setRun({ result: null as unknown as EngineRunResult, revealed: 0, running: true });
+    setRun({ result: null as unknown as EngineRunResult, revealed: 0, running: true, task });
     let res: Response;
     try {
       res = await fetch("/api/run", {
@@ -73,7 +80,7 @@ export function RunView({
       return;
     }
     const result = data as EngineRunResult;
-    setRun({ result, revealed: 0, running: true });
+    setRun({ result, revealed: 0, running: true, task });
     const total = result.turns.length;
     timer.current = setInterval(() => {
       setRun((prev) => {
@@ -104,7 +111,8 @@ export function RunView({
   // PreToolUse/PostToolUse + Stop/SessionEnd), revealed in step with turns.
   const events: { label: string; detail: string; tone: "muted" | "info" | "success" | "warning" | "danger" }[] = [];
   if (result) {
-    events.push({ label: "SessionStart", detail: `task="${task}"`, tone: "info" });
+    // QA-1: label comes from the frozen run record, not the input state.
+    events.push({ label: "SessionStart", detail: `task="${run?.task ?? task}"`, tone: "info" });
     shownTurns.forEach((t, i) => {
       if (t.tool) {
         events.push({
@@ -176,7 +184,6 @@ export function RunView({
             className="mono"
             spellCheck={false}
           />
-          <span className="kbd hidden sm:inline-block">⌘K</span>
           <Button
             variant="primary"
             onClick={startRun}

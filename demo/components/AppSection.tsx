@@ -7,10 +7,10 @@ import { DEFAULT_BUDGET } from "@/lib/result";
 import { Tabs } from "@/components/ui/tabs";
 import { RunView, type RunState } from "@/components/RunView";
 import { CommandPalette, type PaletteCommand } from "@/components/CommandPalette";
-import { BudgetView, EvalView, SafetyView, TraceView, PlanView, INITIAL_EVAL_STATE, type EvalState } from "@/components/views";
+import { BudgetView, EvalView, SafetyView, TraceView, PlanView, INITIAL_EVAL_STATE, INITIAL_SAFETY_STATE, type EvalState, type SafetyState } from "@/components/views";
 
-const TABS = [
-  { id: "run", label: "Run a task", hint: "⌘K" },
+const TABS: { id: string; label: string; hint?: string }[] = [
+  { id: "run", label: "Run a task" },
   { id: "budget", label: "Set limits" },
   { id: "eval", label: "Run the checks" },
   { id: "safety", label: "Test safety" },
@@ -30,6 +30,12 @@ export function AppSection() {
   // BUG-18: eval state lives here (not in EvalView) so results persist
   // across tab switches — the tab component unmounts on navigation.
   const [evalState, setEvalState] = React.useState<EvalState>(INITIAL_EVAL_STATE);
+  // QA-2: same treatment for safety-drill results — they used to reset to
+  // "No drills fired yet" on every tab switch while eval results persisted.
+  const [safetyState, setSafetyState] = React.useState<SafetyState>(INITIAL_SAFETY_STATE);
+  // QA-1: the task input lives here (not in RunView) so it survives tab
+  // switches instead of resetting to the "summarize README" default.
+  const [taskInput, setTaskInput] = React.useState("summarize README");
   const inputRef = React.useRef<HTMLInputElement | null>(null);
 
   const goTo = React.useCallback((id: string) => {
@@ -44,6 +50,15 @@ export function AppSection() {
       inputRef.current?.focus();
       inputRef.current?.select();
     });
+  }, []);
+
+  // QA-4: the hero "Run your first task" CTA (page.tsx) dispatches this
+  // event — switch to the Run tab so the user lands on the right panel,
+  // not whichever tab they left open. The anchor itself handles scrolling.
+  React.useEffect(() => {
+    const onGoRun = () => setTab("run");
+    window.addEventListener("demo:go-run", onGoRun);
+    return () => window.removeEventListener("demo:go-run", onGoRun);
   }, []);
 
   // ⌘K / Ctrl+K opens the command palette from anywhere.
@@ -138,11 +153,11 @@ export function AppSection() {
               transition={{ duration: 0.12, ease: "easeOut" }}
             >
               {tab === "run" && (
-                <RunView budget={budget} setBudget={setBudget} run={run} setRun={setRun} inputRef={inputRef} />
+                <RunView budget={budget} setBudget={setBudget} run={run} setRun={setRun} task={taskInput} setTask={setTaskInput} inputRef={inputRef} />
               )}
               {tab === "budget" && <BudgetView budget={budget} setBudget={setBudget} run={run} />}
               {tab === "eval" && <EvalView evalState={evalState} setEvalState={setEvalState} />}
-              {tab === "safety" && <SafetyView />}
+              {tab === "safety" && <SafetyView safetyState={safetyState} setSafetyState={setSafetyState} />}
               {tab === "trace" && <TraceView run={run} />}
               {tab === "plan" && <PlanView run={run} />}
             </motion.div>

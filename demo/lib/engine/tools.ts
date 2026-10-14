@@ -22,7 +22,19 @@ export function toolReadFile(sandbox: string, args: ToolArgs): string {
     full = realpathSync(candidate);
     root = realpathSync(sandboxResolved);
   } catch (err) {
-    throw new Error(`path escapes sandbox: ${(err as Error).message}`);
+    // QA-6: report the attempted path relative to the sandbox root
+    // ('/sandbox/../../etc/passwd'). realpathSync reports the first missing
+    // path component (e.g. '.../lib/etc'), which after redaction looked like
+    // a server-layout artifact ('/lib/etc') rather than an escape attempt.
+    const rel = path
+      .relative(sandboxResolved, candidate)
+      .split(path.sep)
+      .join("/");
+    const sysMsg = (err as Error).message.replace(
+      /'[^']*'/,
+      `'/sandbox/${rel}'`,
+    );
+    throw new Error(`path escapes sandbox: ${sysMsg}`);
   }
   if (full !== root && !full.startsWith(root + path.sep)) {
     throw new Error("path escapes sandbox");
