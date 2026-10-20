@@ -1,6 +1,6 @@
 # Agentic CLI Workspace
 
-🚀 **Live demo:** https://agentic-cli-workspace-demo.vercel.app
+**Live demo:** https://agentic-cli-workspace-demo.vercel.app
 
 > An engineering deep-dive into agentic coding runtimes — real working code, clean architecture, and honestly measured results. The live demo above is deployed and verified.
 
@@ -8,7 +8,7 @@
 
 ![Demo](demo.gif)
 
-[Demo](demo.gif) | [Architecture](docs/architecture.md) | [API Docs](#) | [Evaluation](#evaluation--performance)
+[Demo](demo.gif) | [Architecture](docs/architecture.md) | [Agent Loop](docs/agent-loop.md) | [Evaluation](#evaluation--performance)
 
 ## What it does
 A headless, terminal-native AI agent capable of traversing a repository, planning changes, editing files, and running test suites. It focuses on the explicit boundary between the LLM's reasoning loop and the host filesystem's execution context.
