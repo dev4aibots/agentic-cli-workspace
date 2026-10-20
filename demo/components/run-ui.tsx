@@ -59,11 +59,27 @@ export function PlanChecklist({ items }: { items: TodoItem[] }) {
 }
 
 /** One turn: tool-call card with zod-validated args, output, bytes. */
-export function TurnCard({ turn }: { turn: EngineRunResult["turns"][number] }) {
+export function TurnCard({
+  turn,
+  active = false,
+}: {
+  turn: EngineRunResult["turns"][number];
+  active?: boolean;
+}) {
   const [open, setOpen] = React.useState(true);
   const r = turn.toolResult;
+  const duStatus = r?.blocked
+    ? "warning"
+    : r?.ok
+      ? "success"
+      : r
+        ? "danger"
+        : "info";
   return (
-    <div className="card overflow-hidden">
+    <div
+      className={`card du-status-rail overflow-hidden${active ? " du-beam-active" : ""}`}
+      data-du-status={duStatus}
+    >
       <button
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}

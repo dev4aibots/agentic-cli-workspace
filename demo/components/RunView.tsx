@@ -301,14 +301,17 @@ export function RunView({
             <h3 className="text-title" style={{ color: "var(--color-text-primary)" }}>
               Turns <span className="text-caption">({revealed}/{result.turns.length})</span>
             </h3>
-            {shownTurns.map((t) => (
+            {shownTurns.map((t, i) => (
               <motion.div
                 key={t.turn}
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.12, ease: "easeOut" }}
               >
-                <TurnCard turn={t} />
+                <TurnCard
+                  turn={t}
+                  active={running && i === shownTurns.length - 1}
+                />
               </motion.div>
             ))}
             {running && (

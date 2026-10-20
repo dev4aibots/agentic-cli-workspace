@@ -4,6 +4,7 @@ import "@fontsource-variable/geist/index.css";
 import "@fontsource-variable/geist-mono/index.css";
 import "./globals.css";
 import "./type-scale.css";
+import "./design-overlay.css";
 import { MotionProvider } from "@/components/MotionProvider";
 
 export const metadata: Metadata = {

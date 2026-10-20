@@ -105,7 +105,7 @@ export function CommandPalette({
           <motion.div
             role="listbox"
             aria-label="Commands"
-            className="card relative w-full max-w-lg overflow-hidden"
+            className="card du-palette-sheen relative w-full max-w-lg overflow-hidden"
             initial={{ opacity: 0, y: -8, scale: 0.99 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -6, scale: 0.99 }}
@@ -130,7 +130,7 @@ export function CommandPalette({
                 className="w-full bg-transparent text-body outline-none placeholder:text-[var(--color-text-muted)]"
                 style={{ color: "var(--color-text-primary)" }}
               />
-              <span className="kbd">esc</span>
+              <span className="kbd du-kbd-hint">esc</span>
             </div>
             <div ref={listRef} className="max-h-72 overflow-y-auto p-2">
               {filtered.length === 0 && (
@@ -169,7 +169,7 @@ export function CommandPalette({
                         {cmd.label}
                       </span>
                       {cmd.hint && (
-                        <span className="kbd ml-auto">{cmd.hint}</span>
+                        <span className="kbd du-kbd-hint ml-auto">{cmd.hint}</span>
                       )}
                     </div>
                   </React.Fragment>
@@ -181,13 +181,13 @@ export function CommandPalette({
               style={{ borderColor: "var(--color-border-hairline)" }}
             >
               <span className="text-caption">
-                <span className="kbd">↑↓</span> move
+                <span className="kbd du-kbd-hint">↑↓</span> move
               </span>
               <span className="text-caption">
-                <span className="kbd">↵</span> run
+                <span className="kbd du-kbd-hint">↵</span> run
               </span>
               <span className="text-caption">
-                <span className="kbd">esc</span> close
+                <span className="kbd du-kbd-hint">esc</span> close
               </span>
             </div>
           </motion.div>

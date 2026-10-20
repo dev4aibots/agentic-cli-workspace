@@ -125,7 +125,7 @@ export function AppSection() {
             aria-label="Open command palette"
           >
             <span className="text-body">Search commands…</span>
-            <span className="kbd">⌘K</span>
+            <span className="kbd du-kbd-hint">⌘K</span>
           </button>
           <div
             className="mt-6 rounded-lg border p-3"

@@ -31,13 +31,13 @@ export default function Page() {
           <span className="mono text-caption hidden md:inline" style={{ color: "var(--color-text-muted)" }}>
             no LLM · no network · no keys
           </span>
-          <span className="kbd">⌘K</span>
+          <span className="kbd du-kbd-hint">⌘K</span>
         </div>
       </header>
 
       {/* Hero — the one BlurText anchor */}
       <section
-        className="relative overflow-hidden px-6 pb-16 pt-20 text-center lg:pb-20 lg:pt-24"
+        className="du-orb-indigo relative overflow-hidden px-6 pb-16 pt-20 text-center lg:pb-20 lg:pt-24"
         style={{ background: "var(--color-bg-accent-glow)" }}
       >
         <p className="text-eyebrow mb-6">Live agent loop · budget caps · safety guards</p>
@@ -58,7 +58,7 @@ export default function Page() {
         <div className="mt-8 flex items-center justify-center gap-4">
           <HeroCta />
           <span className="mono text-caption" style={{ color: "var(--color-text-muted)" }}>
-            press <span className="kbd">⌘K</span> for the command palette
+            press <span className="kbd du-kbd-hint">⌘K</span> for the command palette
           </span>
         </div>
       </section>
