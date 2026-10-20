@@ -20,6 +20,7 @@ export function Tabs({
             key={t.id}
             role="tab"
             aria-selected={isActive}
+            aria-current={isActive ? "page" : undefined}
             onClick={() => onChange(t.id)}
             className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-body outline-none"
             style={{
