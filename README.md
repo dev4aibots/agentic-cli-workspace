@@ -81,3 +81,8 @@ make test
 
 ## Roadmap
 - Integrate tree-sitter for semantic chunking.
+## Proof & Evidence
+
+- **Real engine payload:** every number in the demo comes from the actual engine (plan rewriting per turn, budget caps, safety hooks)
+- **Honest label:** scripted model — no LLM, no network, no API keys; the orchestration loop is real
+- **Guardrails shown:** max turns, max tokens, max $ caps; README documents the design
